@@ -3,6 +3,7 @@ set -e
 
 echo "🚀 正在安装 solosetup ..."
 
+# 检测架构
 ARCH=$(uname -m)
 case $ARCH in
     x86_64)  BIN_ARCH="amd64" ;;
@@ -10,6 +11,7 @@ case $ARCH in
     *)       echo "❌ 不支持的架构: $ARCH"; exit 1 ;;
 esac
 
+# 版本号（与你的 GitHub Release 对应）
 VERSION="v0.1.0"
 BIN_NAME="solosetup-linux-${BIN_ARCH}"
 URL="https://github.com/solosetup/installer/releases/download/${VERSION}/${BIN_NAME}"
@@ -18,5 +20,5 @@ echo "📥 正在下载 ${BIN_NAME} ..."
 curl -sSL "$URL" -o /tmp/solosetup
 chmod +x /tmp/solosetup
 
-echo "✅ 安装完成！运行以下命令启动："
-echo "   /tmp/solosetup"
+echo "✅ 下载完成！启动安装向导..."
+exec /tmp/solosetup
