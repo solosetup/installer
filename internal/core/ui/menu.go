@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"myinstaller/internal/plugin"
 	"myinstaller/internal/core/system"
+	"myinstaller/internal/plugin"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -142,7 +142,7 @@ func (m *MenuModel) View() string {
 
 	var b strings.Builder
 
-	b.WriteString(titleStyle.Render("🚀 欢迎使用 MyInstaller 一键安装工具"))
+	b.WriteString(titleStyle.Render("🚀 欢迎使用 solosetup 一键安装工具"))
 	b.WriteString("\n")
 	b.WriteString(fmt.Sprintf("   当前系统: %s\n\n", m.sysInfo.String()))
 
