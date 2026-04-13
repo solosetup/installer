@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 echo "🚀 正在安装 solosetup ..."
 
@@ -23,7 +22,7 @@ chmod +x /tmp/solosetup
 echo "✅ 下载完成！启动安装向导..."
 # 如果 /dev/tty 可用，则重定向标准输入以支持交互；否则直接执行
 if [ -c /dev/tty ]; then
-    exec /tmp/solosetup </dev/tty
+    exec /tmp/solosetup </dev/stdin
 else
     exec /tmp/solosetup
 fi
