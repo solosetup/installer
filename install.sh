@@ -21,5 +21,9 @@ curl -sSL "$URL" -o /tmp/solosetup
 chmod +x /tmp/solosetup
 
 echo "✅ 下载完成！启动安装向导..."
-# 关键：将标准输入重定向到当前终端，确保管道启动时也能正常交互
-exec /tmp/solosetup </dev/tty
+# 如果 /dev/tty 可用，则重定向标准输入以支持交互；否则直接执行
+if [ -c /dev/tty ]; then
+    exec /tmp/solosetup </dev/tty
+else
+    exec /tmp/solosetup
+fi
