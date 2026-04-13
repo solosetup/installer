@@ -95,7 +95,11 @@ func (p *RosPlugin) Install(sysInfo *system.SystemInfo) error {
 	fmt.Println("请执行以下命令使环境变量生效：")
 	fmt.Printf("  source ~/.bashrc\n")
 	fmt.Printf("或重新打开终端。\n")
-	fmt.Printf("验证安装: roscore\n")
+if selected.ROSVersion == 1 {
+    fmt.Printf("验证安装: roscore\n")
+} else {
+    fmt.Printf("验证安装: source /opt/ros/%s/setup.bash && ros2 run demo_nodes_cpp talker\n", selected.Distro)
+}
 	return nil
 }
 
