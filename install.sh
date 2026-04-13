@@ -12,7 +12,7 @@ case $ARCH in
 esac
 
 # 版本号（与 GitHub Release 对应）
-VERSION="v0.1.0"
+VERSION="v0.1.1"
 BIN_NAME="solosetup-linux-${BIN_ARCH}"
 URL="https://github.com/solosetup/installer/releases/download/${VERSION}/${BIN_NAME}"
 
