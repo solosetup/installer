@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -226,6 +228,22 @@ func RunMenu(sysInfo *system.SystemInfo) ([]plugin.InstallerPlugin, error) {
 
 // 以下简化菜单功能保持不变
 func SimpleMenu(sysInfo *system.SystemInfo) ([]plugin.InstallerPlugin, error) {
+	// 如果环境变量要求非交互，直接返回所有兼容插件
+	if os.Getenv("SOLOSETUP_NONINTERACTIVE") == "1" || os.Getenv("CI") == "true" {
+		allPlugins := plugin.GetAllPlugins()
+		var compatible []plugin.InstallerPlugin
+		for _, p := range allPlugins {
+			if isCompatible(p, sysInfo) {
+				compatible = append(compatible, p)
+			}
+		}
+		if len(compatible) == 0 {
+			return nil, fmt.Errorf("没有兼容当前系统的插件")
+		}
+		fmt.Println("非交互模式：自动选择所有兼容插件")
+		return compatible, nil
+	}
+
 	allPlugins := plugin.GetAllPlugins()
 	var compatible []plugin.InstallerPlugin
 	for _, p := range allPlugins {
@@ -274,8 +292,26 @@ func ShowInstallSummary(plugins []plugin.InstallerPlugin) {
 }
 
 func ConfirmInstallation() bool {
-	fmt.Print("确认开始安装? [y/N]: ")
-	var confirm string
-	fmt.Scanln(&confirm)
-	return strings.ToLower(confirm) == "y" || strings.ToLower(confirm) == "yes"
+	// 非交互模式下直接返回 true
+	if os.Getenv("SOLOSETUP_NONINTERACTIVE") == "1" || os.Getenv("CI") == "true" {
+		fmt.Println("非交互模式：自动确认安装")
+		return true
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("确认开始安装? [y/N]: ")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			return false
+		}
+		input = strings.TrimSpace(strings.ToLower(input))
+		if input == "y" || input == "yes" {
+			return true
+		}
+		if input == "n" || input == "no" || input == "" {
+			return false
+		}
+		fmt.Println("无效输入，请输入 y 或 n")
+	}
 }

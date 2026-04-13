@@ -19,9 +19,11 @@ func init() {
 	plugin.Register(&RosPlugin{})
 }
 
-func (p *RosPlugin) Name() string          { return "ros" }
-func (p *RosPlugin) DisplayName() string   { return "ROS (Robot Operating System)" }
-func (p *RosPlugin) Description() string   { return "安装 ROS 1 / ROS 2 开发环境，支持多版本选择" }
+func (p *RosPlugin) Name() string        { return "ros" }
+func (p *RosPlugin) DisplayName() string { return "ROS (Robot Operating System)" }
+func (p *RosPlugin) Description() string {
+	return "安装 ROS 1 / ROS 2 开发环境，支持多版本选择"
+}
 func (p *RosPlugin) Dependencies() []string { return []string{} }
 
 func (p *RosPlugin) SupportedSystems() []system.SystemConstraint {
@@ -95,11 +97,11 @@ func (p *RosPlugin) Install(sysInfo *system.SystemInfo) error {
 	fmt.Println("请执行以下命令使环境变量生效：")
 	fmt.Printf("  source ~/.bashrc\n")
 	fmt.Printf("或重新打开终端。\n")
-if selected.ROSVersion == 1 {
-    fmt.Printf("验证安装: roscore\n")
-} else {
-    fmt.Printf("验证安装: source /opt/ros/%s/setup.bash && ros2 run demo_nodes_cpp talker\n", selected.Distro)
-}
+	if selected.ROSVersion == 1 {
+		fmt.Printf("验证安装: roscore\n")
+	} else {
+		fmt.Printf("验证安装: source /opt/ros/%s/setup.bash && ros2 run demo_nodes_cpp talker\n", selected.Distro)
+	}
 	return nil
 }
 
@@ -113,6 +115,21 @@ func (p *RosPlugin) isSystemCompatible(sysInfo *system.SystemInfo) bool {
 }
 
 func (p *RosPlugin) selectROSVersion(compatible []ROSVersion) (ROSVersion, error) {
+	// 非交互模式：自动选择推荐版本，若无推荐则选第一个
+	if os.Getenv("SOLOSETUP_NONINTERACTIVE") == "1" || os.Getenv("CI") == "true" {
+		for _, v := range compatible {
+			if v.Recommended {
+				fmt.Printf("非交互模式：自动选择推荐版本 %s\n", v.Distro)
+				return v, nil
+			}
+		}
+		if len(compatible) > 0 {
+			fmt.Printf("非交互模式：自动选择第一个兼容版本 %s\n", compatible[0].Distro)
+			return compatible[0], nil
+		}
+		return ROSVersion{}, fmt.Errorf("没有可用的 ROS 版本")
+	}
+
 	fmt.Println("\n请选择要安装的 ROS 版本:")
 	for i, v := range compatible {
 		rec := ""

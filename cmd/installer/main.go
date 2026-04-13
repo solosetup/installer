@@ -31,6 +31,11 @@ var (
 func main() {
 	flag.Parse()
 
+	// 优先读取环境变量设置非交互模式（用于自动化测试）
+	if os.Getenv("SOLOSETUP_NONINTERACTIVE") == "1" || os.Getenv("CI") == "true" {
+		*nonInteractive = true
+	}
+
 	if *showVersion {
 		fmt.Printf("myinstaller version %s\n", version)
 		os.Exit(0)
@@ -125,18 +130,30 @@ func main() {
 
 		if err := checkDependencies(p, selectedPlugins); err != nil {
 			fmt.Printf("依赖检查失败: %v\n", err)
-			if !continueOnError && !askContinueOnError(p.DisplayName(), err) {
-				fmt.Println("安装中止。")
-				os.Exit(1)
+			if !continueOnError {
+				if *nonInteractive {
+					fmt.Println("非交互模式：安装失败，中止流程")
+					os.Exit(1)
+				}
+				if !askContinueOnError(p.DisplayName(), err) {
+					fmt.Println("安装中止。")
+					os.Exit(1)
+				}
 			}
 			continue
 		}
 
 		if err := p.Install(sysInfo); err != nil {
 			fmt.Printf("\n❌ 安装 %s 失败: %v\n", p.DisplayName(), err)
-			if !continueOnError && !askContinueOnError(p.DisplayName(), err) {
-				fmt.Println("安装中止。")
-				os.Exit(1)
+			if !continueOnError {
+				if *nonInteractive {
+					fmt.Println("非交互模式：安装失败，中止流程")
+					os.Exit(1)
+				}
+				if !askContinueOnError(p.DisplayName(), err) {
+					fmt.Println("安装中止。")
+					os.Exit(1)
+				}
 			}
 		} else {
 			fmt.Printf("\n✅ %s 安装成功！\n", p.DisplayName())
@@ -150,6 +167,12 @@ func main() {
 }
 
 func askContinueOnError(pluginName string, err error) bool {
+	// 非交互模式下直接返回 false，中止流程
+	if os.Getenv("SOLOSETUP_NONINTERACTIVE") == "1" || os.Getenv("CI") == "true" {
+		fmt.Println("非交互模式：遇到错误自动中止")
+		return false
+	}
+
 	fmt.Printf("\n安装 %s 时出错: %v\n", pluginName, err)
 	fmt.Print("是否继续安装其他软件? [y/N]: ")
 	var answer string
@@ -204,6 +227,7 @@ func selectPluginsInteractive(sysInfo *system.SystemInfo, nonInteractive bool) (
 		if len(compatible) == 0 {
 			return nil, fmt.Errorf("没有兼容当前系统的插件")
 		}
+		fmt.Println("非交互模式：自动选择所有兼容插件")
 		return compatible, nil
 	}
 

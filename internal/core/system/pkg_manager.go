@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -30,56 +31,66 @@ func NewPackageManager(sysInfo *SystemInfo) PackageManager {
 type AptManager struct{}
 
 func (a *AptManager) Update() error {
-	return runCommand("sudo", "apt", "update")
+	return runCommand("apt", "update")
 }
 
 func (a *AptManager) Install(pkgs ...string) error {
-	args := append([]string{"apt", "install", "-y"}, pkgs...)
-	return runCommand("sudo", args...)
+	args := append([]string{"install", "-y"}, pkgs...)
+	return runCommand("apt", args...)
 }
 
 func (a *AptManager) Remove(pkgs ...string) error {
-	args := append([]string{"apt", "remove", "-y"}, pkgs...)
-	return runCommand("sudo", args...)
+	args := append([]string{"remove", "-y"}, pkgs...)
+	return runCommand("apt", args...)
 }
 
 // DnfManager Fedora/RHEL 系列
 type DnfManager struct{}
 
 func (d *DnfManager) Update() error {
-	return runCommand("sudo", "dnf", "check-update")
+	return runCommand("dnf", "check-update")
 }
 
 func (d *DnfManager) Install(pkgs ...string) error {
-	args := append([]string{"dnf", "install", "-y"}, pkgs...)
-	return runCommand("sudo", args...)
+	args := append([]string{"install", "-y"}, pkgs...)
+	return runCommand("dnf", args...)
 }
 
 func (d *DnfManager) Remove(pkgs ...string) error {
-	args := append([]string{"dnf", "remove", "-y"}, pkgs...)
-	return runCommand("sudo", args...)
+	args := append([]string{"remove", "-y"}, pkgs...)
+	return runCommand("dnf", args...)
 }
 
 // YumManager 旧版 RHEL/CentOS
 type YumManager struct{}
 
 func (y *YumManager) Update() error {
-	return runCommand("sudo", "yum", "check-update")
+	return runCommand("yum", "check-update")
 }
 
 func (y *YumManager) Install(pkgs ...string) error {
-	args := append([]string{"yum", "install", "-y"}, pkgs...)
-	return runCommand("sudo", args...)
+	args := append([]string{"install", "-y"}, pkgs...)
+	return runCommand("yum", args...)
 }
 
 func (y *YumManager) Remove(pkgs ...string) error {
-	args := append([]string{"yum", "remove", "-y"}, pkgs...)
-	return runCommand("sudo", args...)
+	args := append([]string{"remove", "-y"}, pkgs...)
+	return runCommand("yum", args...)
 }
 
-// runCommand 执行命令并实时输出
+// isRoot 检查当前进程是否以 root 用户运行
+func isRoot() bool {
+	return os.Geteuid() == 0
+}
+
+// runCommand 执行命令并实时输出，自动根据是否为 root 决定是否添加 sudo
 func runCommand(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
+	var cmd *exec.Cmd
+	if isRoot() {
+		cmd = exec.Command(name, args...)
+	} else {
+		cmd = exec.Command("sudo", append([]string{name}, args...)...)
+	}
 	cmd.Stdout = &cmdOutput{}
 	cmd.Stderr = &cmdOutput{}
 	return cmd.Run()
@@ -101,15 +112,20 @@ func AddRepository(sysInfo *SystemInfo, repoLine, keyURL string) error {
 
 	if keyURL != "" {
 		keyPath := "/tmp/repo_key.gpg"
-		if err := runCommand("sudo", "curl", "-fsSL", keyURL, "-o", keyPath); err != nil {
+		if err := runCommand("curl", "-fsSL", keyURL, "-o", keyPath); err != nil {
 			return fmt.Errorf("下载密钥失败: %w", err)
 		}
-		if err := runCommand("sudo", "apt-key", "add", keyPath); err != nil {
+		if err := runCommand("apt-key", "add", keyPath); err != nil {
 			return fmt.Errorf("添加密钥失败: %w", err)
 		}
 	}
 
 	repoFile := "/etc/apt/sources.list.d/custom.list"
-	cmd := fmt.Sprintf("echo '%s' | sudo tee %s", repoLine, repoFile)
+	var cmd string
+	if isRoot() {
+		cmd = fmt.Sprintf("echo '%s' | tee %s", repoLine, repoFile)
+	} else {
+		cmd = fmt.Sprintf("echo '%s' | sudo tee %s", repoLine, repoFile)
+	}
 	return runCommand("sh", "-c", cmd)
 }
