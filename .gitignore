@@ -35,3 +35,5 @@ Thumbs.db
 *.cover
 *.coverprofile
 coverage.html
+go*.tar.gz
+solosetup-test
