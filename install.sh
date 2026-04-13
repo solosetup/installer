@@ -11,7 +11,7 @@ case $ARCH in
     *)       echo "❌ 不支持的架构: $ARCH"; exit 1 ;;
 esac
 
-VERSION="v0.1.2"
+VERSION="v0.1.3"
 BIN_NAME="solosetup-linux-${BIN_ARCH}"
 URL="https://github.com/solosetup/installer/releases/download/${VERSION}/${BIN_NAME}"
 

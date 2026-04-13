@@ -292,17 +292,26 @@ func ShowInstallSummary(plugins []plugin.InstallerPlugin) {
 }
 
 func ConfirmInstallation() bool {
-	// 非交互模式下直接返回 true
+	// 非交互模式直接返回 true
 	if os.Getenv("SOLOSETUP_NONINTERACTIVE") == "1" || os.Getenv("CI") == "true" {
 		fmt.Println("非交互模式：自动确认安装")
 		return true
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	// 尝试从 /dev/tty 读取输入，如果失败则回退到 os.Stdin
+	var reader *bufio.Reader
+	if tty, err := os.Open("/dev/tty"); err == nil {
+		defer tty.Close()
+		reader = bufio.NewReader(tty)
+	} else {
+		reader = bufio.NewReader(os.Stdin)
+	}
+
 	for {
 		fmt.Print("确认开始安装? [y/N]: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
+			// 读取失败，默认返回 false
 			return false
 		}
 		input = strings.TrimSpace(strings.ToLower(input))
