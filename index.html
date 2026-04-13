@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>solosetup · 一行命令安装器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <style>
+        body { margin: 0; padding: 2rem; background: #f6f8fa; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="container markdown-body">
+        <h1><a href="https://github.com/solosetup/installer" style="text-decoration: none; color: #0969da;">installer</a></h1>
+        <h2>solosetup</h2>
+        <blockquote>
+            <p>🚀 <strong>一行命令，独奏式开发环境搭建</strong></p>
+        </blockquote>
+        <p><img src="https://img.shields.io/badge/release-v0.1.0-blue" alt="release"> <img src="https://img.shields.io/badge/Go-1.18-00ADD8" alt="Go"> <img src="https://img.shields.io/badge/license-MIT-green" alt="license"></p>
+        <p><code>solosetup</code> 是一个用 Go 语言编写的<strong>零依赖、跨平台</strong>的一行命令安装器。它将复杂的开发环境配置（如 ROS、Docker 等）压缩成一条命令，让开发者从繁琐的手动安装中解放出来。</p>
+        <hr>
+        <h3>⚠️ 当前状态：公开测试版 (Beta)</h3>
+        <p><code>solosetup</code> 目前处于 <strong>v0.1.0</strong> 早期开发阶段。核心框架已经可用，但功能仍在快速迭代中。</p>
+        <ul>
+            <li>✅ <strong>已支持</strong>：Ubuntu 22.04 (ARM64) 上的 ROS 2 Humble 一键安装</li>
+            <li>🚧 <strong>开发中</strong>：更多 ROS 版本（Noetic、Jazzy）、Docker、VSCode 等插件</li>
+            <li>🚧 <strong>开发中</strong>：卸载功能、自更新、macOS/Windows 兼容性</li>
+        </ul>
+        <p><strong>欢迎早期试用者反馈问题和建议，但不建议在生产环境或关键任务中完全依赖。</strong></p>
+        <hr>
+        <h3>✨ 特性</h3>
+        <ul>
+            <li><strong>零依赖</strong>：编译为单一静态二进制文件，无需安装 Python、Go 或其他运行时。</li>
+            <li><strong>国内镜像源智能择优</strong>：内置阿里云、清华、中科大等镜像站，自动测速并选择最快的可用源。</li>
+            <li><strong>交互式 TUI 菜单</strong>：基于 Bubble Tea 构建，操作直观。</li>
+            <li><strong>插件化架构</strong>：轻松扩展新软件支持，只需实现标准接口。</li>
+            <li><strong>非交互模式</strong>：支持通过配置文件或 <code>-y</code> 参数实现无人值守安装。</li>
+            <li><strong>系统自动探测</strong>：识别 Linux 发行版、版本、架构，自动适配安装策略。</li>
+        </ul>
+        <hr>
+        <h3>🚀 快速开始</h3>
+        <pre><code>curl -sSL https://get.chaixiangyu.cn/install.sh | bash</code></pre>
+        <p>或者从源码编译：</p>
+        <pre><code>git clone https://github.com/solosetup/installer.git
+cd installer
+go build -o solosetup ./cmd/installer
+./solosetup</code></pre>
+        <hr>
+        <p>📦 <a href="https://github.com/solosetup/installer/releases">查看 Release</a> · 🐛 <a href="https://github.com/solosetup/installer/issues">报告问题</a> · 🤝 <a href="https://github.com/solosetup/installer/fork">贡献代码</a></p>
+    </div>
+</body>
+</html>
