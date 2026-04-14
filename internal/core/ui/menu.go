@@ -298,12 +298,13 @@ func ConfirmInstallation() bool {
 		return true
 	}
 
-	// 尝试从 /dev/tty 读取输入，如果失败则回退到 os.Stdin
+	// 尝试从 /dev/tty 读取输入
 	var reader *bufio.Reader
 	if tty, err := os.Open("/dev/tty"); err == nil {
 		defer tty.Close()
 		reader = bufio.NewReader(tty)
 	} else {
+		// 回退到标准输入（适用于非管道场景或容器内）
 		reader = bufio.NewReader(os.Stdin)
 	}
 
@@ -311,7 +312,7 @@ func ConfirmInstallation() bool {
 		fmt.Print("确认开始安装? [y/N]: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			// 读取失败，默认返回 false
+			// 读取失败（如 EOF），默认返回 false
 			return false
 		}
 		input = strings.TrimSpace(strings.ToLower(input))
